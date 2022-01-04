@@ -1,0 +1,53 @@
+﻿@page "/mars-rover-photos"
+@inject HttpClient Http
+
+<PageTitle>Mars Rover Photos</PageTitle>
+
+<Header Text="Mars Rover Photos" />
+
+
+@if (data == null)
+{
+    <Loader />
+}
+else
+{
+    <div class="card-deck row justify-content-center">
+        @foreach (var element in data)
+        {
+            <div class="card col-3 m-3 p-0">
+                <a href=@element.img_src target="_blank">
+                    <img class="card-img-top col-3" src=@element.img_src alt="..." />
+                </a>
+                <div class="card-body">
+                    <p class="card-text">Sol - @element.sol</p>
+                    <p class="card-text">Earth date - @element.earth_date</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private NasaDataPhoto[] data;
+    private NasaDataRequest request;
+    private string token = GlobalData.token;
+    protected override async Task OnInitializedAsync()
+    {
+        request = await
+        Http.GetFromJsonAsync<NasaDataRequest>($"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/latest_photos?api_key={token}");
+        data = request.latest_photos;
+    }
+
+    public class NasaDataPhoto
+    {
+        public int id { get; set; }
+        public int sol { get; set; }
+        public string img_src { get; set; }
+        public string earth_date { get; set; }
+    }
+    public class NasaDataRequest
+    {
+        public NasaDataPhoto[] latest_photos { get; set; }
+    }
+}
